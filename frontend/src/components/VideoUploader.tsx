@@ -16,10 +16,21 @@ const VideoUploader = () => {
       <p className="text-gray-600">Select an Mp4 file to begin editing</p>
       <Input
         type="file"
-        accept="video"
+        accept="video/*"
         className="cursor-pointer hover:border-blue-400"
         onChange={handleFileChange}
       />
+
+      {videoFile && (
+        <div className="mt-6 w-full flex flex-col items-center">
+          <p className="text-sm font-medium text-zinc-700 mb-2">Preview:</p>
+          <video
+            controls
+            className="w-full max-w-lg rounded-lg shadow-md bg-black"
+            src={URL.createObjectURL(videoFile)}
+          />
+        </div>
+      )}
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { fetchFile } from "@ffmpeg/util";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,9 @@ const VideoUploader = ({ ffmpeg }: VideoUploaderProps) => {
   const [processedVideoUrl, setProcessedVideoUrl] = useState<string | null>(
     null,
   );
+  const [startTime, setStartTime] = useState<number>(0);
+  const [endTime, setEndTime] = useState<number>(5);
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -21,6 +24,11 @@ const VideoUploader = ({ ffmpeg }: VideoUploaderProps) => {
       console.log("File captured successfully:", file.name);
     }
   };
+
+  const previewUrl = useMemo(() => {
+    if (!videoFile) return undefined;
+    return URL.createObjectURL(videoFile);
+  }, [videoFile]);
 
   //Video Trimming
   const handleTrimVideo = async () => {
@@ -33,15 +41,16 @@ const VideoUploader = ({ ffmpeg }: VideoUploaderProps) => {
     await ffmpeg.writeFile("input.mp4", await fetchFile(videoFile));
 
     console.log("Processing video...");
+    const duration = String(endTime - startTime);
+    const start = String(startTime);
 
-    // 2. Run the FFmpeg command (Start at 0 seconds, duration 5 seconds)
     await ffmpeg.exec([
       "-i",
       "input.mp4",
       "-ss",
-      "00:00:00",
+      start,
       "-t",
-      "5",
+      duration,
       "output.mp4",
     ]);
 
@@ -74,14 +83,40 @@ const VideoUploader = ({ ffmpeg }: VideoUploaderProps) => {
           <video
             controls
             className="w-full max-w-lg rounded-lg shadow-md bg-black"
-            src={URL.createObjectURL(videoFile)}
+            src={previewUrl}
           />
+          <div className="flex gap-4 mt-4 mb-4">
+            <div className="flex flex-col">
+              <label className="text-xs font-bold text-zinc-500 mb-1">
+                Start Time (seconds)
+              </label>
+              <Input
+                type="number"
+                min="0"
+                value={startTime}
+                onChange={(e) => setStartTime(Number(e.target.value))}
+                className="w-32"
+              />
+            </div>
+            <div className="flex flex-col">
+              <label className="text-xs font-bold text-zinc-500 mb-1">
+                End Time (seconds)
+              </label>
+              <Input
+                type="number"
+                min="1"
+                value={endTime}
+                onChange={(e) => setEndTime(Number(e.target.value))}
+                className="w-32"
+              />
+            </div>
+          </div>
           <Button
             className="mt-4"
             onClick={handleTrimVideo}
             disabled={isProcessing}
           >
-            {isProcessing ? "Processing... ⏳" : "Trim First 5 Seconds ✂️"}
+            {isProcessing ? "Processing... ⏳" : "Trim ✂️"}
           </Button>
 
           {processedVideoUrl && (

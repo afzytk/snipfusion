@@ -3,6 +3,7 @@ import { useState, useMemo } from "react";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { fetchFile } from "@ffmpeg/util";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 
 interface VideoUploaderProps {
   ffmpeg: FFmpeg;
@@ -16,6 +17,7 @@ const VideoUploader = ({ ffmpeg }: VideoUploaderProps) => {
   );
   const [startTime, setStartTime] = useState<number>(0);
   const [endTime, setEndTime] = useState<number>(5);
+  const [progress, setProgress] = useState<number>(0);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -39,6 +41,11 @@ const VideoUploader = ({ ffmpeg }: VideoUploaderProps) => {
 
     // 1. Write the file to FFmpeg's virtual file system
     await ffmpeg.writeFile("input.mp4", await fetchFile(videoFile));
+
+    setProgress(0);
+    ffmpeg.on("progress", ({ progress }) => {
+      setProgress(Math.round(progress * 100));
+    });
 
     console.log("Processing video...");
     const duration = String(endTime - startTime);
@@ -118,6 +125,14 @@ const VideoUploader = ({ ffmpeg }: VideoUploaderProps) => {
           >
             {isProcessing ? "Processing... ⏳" : "Trim ✂️"}
           </Button>
+          {isProcessing && (
+            <div className="w-full max-w-lg mt-4 flex flex-col gap-2">
+              <Progress value={progress} className="w-full h-3" />
+              <p className="text-xs text-center font-medium text-zinc-500">
+                Rendering: {progress}%
+              </p>
+            </div>
+          )}
 
           {processedVideoUrl && (
             <div className="mt-6 w-full flex flex-col items-center border-t border-zinc-200 pt-6">

@@ -4,6 +4,7 @@ import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { fetchFile } from "@ffmpeg/util";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Slider } from "@/components/ui/slider";
 
 interface VideoUploaderProps {
   ffmpeg: FFmpeg;
@@ -11,13 +12,14 @@ interface VideoUploaderProps {
 
 const VideoUploader = ({ ffmpeg }: VideoUploaderProps) => {
   const [videoFile, setVideoFile] = useState<File | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [processedVideoUrl, setProcessedVideoUrl] = useState<string | null>(
     null,
   );
   const [startTime, setStartTime] = useState<number>(0);
   const [endTime, setEndTime] = useState<number>(5);
   const [progress, setProgress] = useState<number>(0);
+  const [videoDuration, setVideoDuration] = useState<number>(0);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -91,32 +93,36 @@ const VideoUploader = ({ ffmpeg }: VideoUploaderProps) => {
             controls
             className="w-full max-w-lg rounded-lg shadow-md bg-black"
             src={previewUrl}
+            onLoadedMetadata={(e) => {
+              const duration = Math.round(e.currentTarget.duration);
+              setVideoDuration(duration);
+              setEndTime(duration);
+            }}
           />
-          <div className="flex gap-4 mt-4 mb-4">
-            <div className="flex flex-col">
-              <label className="text-xs font-bold text-zinc-500 mb-1">
-                Start Time (seconds)
-              </label>
-              <Input
-                type="number"
-                min="0"
-                value={startTime}
-                onChange={(e) => setStartTime(Number(e.target.value))}
-                className="w-32"
-              />
+          <div className="w-full max-w-lg mt-6 mb-6">
+            <label className="text-sm font-bold text-zinc-700 mb-4 block text-center">
+              Trim Timeline
+            </label>
+
+            <div className="flex justify-between text-xs font-medium text-zinc-500 mb-2 px-1">
+              <span>Start: {startTime}s</span>
+              <span>End: {endTime}s</span>
             </div>
-            <div className="flex flex-col">
-              <label className="text-xs font-bold text-zinc-500 mb-1">
-                End Time (seconds)
-              </label>
-              <Input
-                type="number"
-                min="1"
-                value={endTime}
-                onChange={(e) => setEndTime(Number(e.target.value))}
-                className="w-32"
-              />
-            </div>
+
+            {/* The Dual-Thumb Slider */}
+            <Slider
+              value={[startTime, endTime]}
+              max={videoDuration}
+              step={1}
+              minStepsBetweenValues={1}
+              onValueChange={(values) => {
+                if (Array.isArray(values)) {
+                  setStartTime(values[0]);
+                  setEndTime(values[1]);
+                }
+              }}
+              className="w-full cursor-pointer"
+            />
           </div>
           <Button
             className="mt-4"

@@ -19,12 +19,17 @@ interface EditorState {
   addVideo: (file: File, duration: number) => void; // Adds a video clip
   updateCurrentTime: (time: number) => void; // Moves the playhead scrubber
   updateItemStartTime: (id: string, newStartTime: number) => void;
+  isPlaying: boolean;
+  setIsPlaying: (playing: boolean) => void;
 }
 
 // Zustand global store
 export const useEditorStore = create<EditorState>((set) => ({
   timelineItems: [],
   currentTime: 0,
+
+  isPlaying: false,
+  setIsPlaying: (playing) => set({ isPlaying: playing }),
 
   // Adds a new video to the absolute beginning (0:00) of the timeline
   addVideo: (file, duration) =>

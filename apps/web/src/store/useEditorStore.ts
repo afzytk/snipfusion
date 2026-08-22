@@ -18,6 +18,7 @@ interface EditorState {
 
   addVideo: (file: File, duration: number) => void; // Adds a video clip
   updateCurrentTime: (time: number) => void; // Moves the playhead scrubber
+  updateItemStartTime: (id: string, newStartTime: number) => void;
 }
 
 // Zustand global store
@@ -38,6 +39,15 @@ export const useEditorStore = create<EditorState>((set) => ({
           duration: duration,
         },
       ],
+    })),
+
+  updateItemStartTime: (id, newStartTime) =>
+    set((state) => ({
+      timelineItems: state.timelineItems.map((item) =>
+        item.id === id
+          ? { ...item, startTime: Math.max(0, newStartTime) }
+          : item,
+      ),
     })),
 
   // Updates the timeline playhead position

@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import MediaBin from "./components/MediaBin";
 import Player from "./components/Player";
 import Timeline from "./components/Timeline";
+import ExportButton from "./components/ExportButton";
 
 export default function App() {
   return (
@@ -12,9 +13,7 @@ export default function App() {
           <div className="w-3 h-3 bg-blue-600 rounded-full animate-pulse" />
           <h1 className="font-bold text-zinc-100 tracking-wider">SNIPFUSION</h1>
         </div>
-        <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
-          Export Video
-        </Button>
+        <ExportButton />
       </div>
 
       {/* Media Bin + Player */}

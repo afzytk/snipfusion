@@ -11,7 +11,7 @@ export default function Player() {
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [videoUrl, setVideoUrl] = useState<string>("");
+  const [videoUrl, setVideoUrl] = useState<string | undefined>(undefined);
 
   const activeClip = timelineItems.find(
     (item) =>
@@ -37,7 +37,8 @@ export default function Player() {
       setVideoUrl(url);
       return () => URL.revokeObjectURL(url);
     } else {
-      setVideoUrl("");
+      setVideoUrl(undefined);
+
       const canvas = canvasRef.current;
       const ctx = canvas?.getContext("2d");
       if (ctx && canvas) {
